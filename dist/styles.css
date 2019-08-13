@@ -1,0 +1,95 @@
+* {
+  margin: 0;
+  padding: 0; }
+
+:root {
+  --text: #67809f;
+  --title_text: #b0e4f2ba;
+  --bg: rgb(224, 218, 218);
+  --inverse-bg: #333;
+  --svg-bg: #0e3040; }
+
+body {
+  background: var(--svg-bg); }
+
+.container {
+  text-align: center;
+  color: var(--text); }
+  .container .display {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0; }
+    .container .display__title {
+      font-weight: bold;
+      color: var(--title_text);
+      padding: 5px; }
+    .container .display__svg {
+      text-align: center; }
+      .container .display__svg .dot {
+        stroke: rgba(29, 18, 15, 0.87); }
+  .container address {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    color: var(--title_text);
+    font-size: 11px; }
+    .container address #profile-link {
+      color: #a5e215;
+      text-decoration: none;
+      font-weight: bold; }
+  .container #tooltip {
+    text-align: left;
+    background: rgba(47, 79, 79, 0.938);
+    pointer-events: none;
+    shape-rendering: crispEdges; }
+    .container #tooltip label {
+      padding: 1px;
+      color: rgba(231, 221, 221, 0.89); }
+      .container #tooltip label b {
+        color: #32c5df; }
+  .container #x-axis,
+  .container #y-axis {
+    font-weight: 600;
+    shape-rendering: crispEdges; }
+  .container .y-axis-label {
+    font-size: 1.5em; }
+    @media only screen and (min-width: 768px) {
+      .container .y-axis-label {
+        font-size: 2em; } }
+
+#loading {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background: var(--svg-bg);
+  z-index: 555; }
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  /* Safari */
+  animation: spin 2s linear infinite; }
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg); } }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(360deg); } }
