@@ -10,12 +10,7 @@
   --svg-bg: #0e3040;
 }
 @mixin respond-to($breakpoint) {
-  @media only screen and (min-width: $breakpoint + px) {
-    @content;
-  }
-}
-@mixin respond-to($breakpoint) {
-  @media only screen and (min-width: $breakpoint + px) {
+  @media only screen and (max-width: $breakpoint + px) {
     @content;
   }
 }
@@ -49,16 +44,20 @@ body {
     }
   }
   address {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 0;
     left: 0;
     right: 0;
     color: var(--title_text);
-    font-size: 11px;
+    font-size: 0.65em;
+    background: #333;
     #profile-link {
       color: rgb(165, 226, 21);
       text-decoration: none;
       font-weight: bold;
+    }
+    @include respond-to(414) {
+      display: none;
     }
   }
 
@@ -83,9 +82,6 @@ body {
 
   .y-axis-label {
     font-size: 1.5em;
-    @include respond-to(768) {
-      font-size: 2em;
-    }
   }
 }
 #loading {
