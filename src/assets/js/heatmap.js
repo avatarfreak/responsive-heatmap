@@ -17,7 +17,7 @@ export class Heatmap {
     this.sizes = {
       height: display.clientHeight,
       width: display.clientWidth,
-      margin: { top: 20, right: 80, bottom: 180, left: 80 }
+      margin: { top: 20, right: 80, bottom: 190, left: 80 }
     };
 
     this.drawCanvas(this.sizes)
@@ -26,7 +26,7 @@ export class Heatmap {
       .addRect()
       .addTooltip()
       .addLegend()
-      .animate()
+      .animate();
   }
   /**
    *
@@ -85,7 +85,11 @@ export class Heatmap {
       .data([null])
       .join("g")
       .attr("id", "x-axis")
-      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.innerHeight + this.sizes.margin.top})`)
+      .attr(
+        "transform",
+        `translate(${this.sizes.margin.left}, ${this.innerHeight +
+          this.sizes.margin.top})`
+      )
       .call(xAxis)
       //rotate text at axis to 45 deg
       .selectAll("text")
@@ -107,7 +111,10 @@ export class Heatmap {
       .data([null])
       .join("g")
       .attr("id", "y-axis")
-      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`)
+      .attr(
+        "transform",
+        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
+      )
       .call(yAxis);
     return this;
   }
@@ -132,18 +139,28 @@ export class Heatmap {
       .attr("x", (d, i) => this.xScale(d.year))
       .attr("y", d => this.yScale(d.month))
       .attr("width", this.xScale.bandwidth)
-      .attr("height", this.yScale.bandwidth)
+      .attr("height", 0)
       .attr("fill", d => colorScale(d.variance))
-      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`)
+      .attr(
+        "transform",
+        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
+      )
       .on("mouseover", this.mouseover())
       .on("mouseout", this.mouseout());
 
     return this;
   }
-animate(){
-  this.rect.transition().duration(200)
-  return this;
-}
+  animate() {
+    this.rect = this.svg
+      .selectAll(".cell")
+      .transition()
+      .ease(d3.easeLinear)
+      .duration(2000)
+      .ease(d3.easeElastic)
+      .attr("height", this.yScale.bandwidth);
+
+    return this;
+  }
   mouseout() {
     let tooltip = this.tooltip;
     return function() {
@@ -205,7 +222,9 @@ animate(){
 
     const legendScale = d3
       .scaleLinear()
-      .domain( d3.extent(data.monthlyVariance, d => data.baseTemperature + d.variance))
+      .domain(
+        d3.extent(data.monthlyVariance, d => data.baseTemperature + d.variance)
+      )
       .range([0, this.innerWidth]);
 
     //grouping lengend elements
@@ -215,7 +234,10 @@ animate(){
       .data([null])
       .join("g")
       .attr("id", "legend")
-      .attr( "transform", `translate(${margin.left}, ${this.innerHeight + margin.top + 50})`)
+      .attr(
+        "transform",
+        `translate(${margin.left}, ${this.innerHeight + margin.top + 50})`
+      )
       .call(legendAxis);
 
     //appending rect to legend
@@ -224,7 +246,10 @@ animate(){
       .data(data.monthlyVariance)
       .join("rect")
       .attr("class", "legend-rect")
-      .attr( "width", (data.monthlyVariance.length * 2) / data.monthlyVariance.length)
+      .attr(
+        "width",
+        (data.monthlyVariance.length * 2) / data.monthlyVariance.length
+      )
       .attr("height", 30)
       .attr("x", (d, i) => legendScale(data.baseTemperature + d.variance))
       .attr("y", (d, i) => margin.top)
