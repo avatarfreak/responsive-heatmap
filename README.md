@@ -1,7 +1,5 @@
 # Data Visualization Projects - Visualize Data with a Heat Map
 
-- Fulfill the below user stories and get all of the tests to pass. Give it your own personal style.
-
 - You can use HTML, JavaScript, CSS, and the D3 svg-based visualization library. The tests require axes to be generated using the D3 axis property, which automatically generates ticks along the axis. These ticks are required for passing the D3 tests because their positions are used to determine alignment of graphed elements. You will find information about generating axes at https://github.com/d3/d3/blob/master/API.md#axes-d3-axis. Required (non-virtual) DOM elements are queried on the moment of each test. If you use a frontend framework (like Vue for example), the test results may be inaccurate for dynamic content. We hope to accommodate them eventually, but these frameworks are not currently supported for D3 projects.
 
 - User Story #1: My heat map should have a title with a corresponding `id="title"`.
@@ -24,10 +22,13 @@
 
 ## Important notes
 
-- This responsive visual graphic chart is built on top of **D3 version 5** library. First thing first, to achieve responisve chart, `window: resize event` is being used.
+- This responsive visual graphic chart is built on top of **D3 version 5** library. First thing first, to achieve responisve chart, `window: resize event` is being used. Alternatively, d3 do have resize event. Please, see below.
+  Es6 class oops pattern has been used.
 
   ```
   window.addEventListener('resize', somefunction)
+  or
+  d3.select(window).on('resize, function(){})
   ```
 
 - **D3v5** substituted asynchronous callbacks with promises. Therefore, fetching external data is different from previous version.
@@ -93,7 +94,7 @@ $ git clone https://github.com/avatarfreak/responsive-heatmap.git
 - clone this project
 
   - `$ git clone "https://github.com/avatarfreak/responsive-heatmap.git"`
-  - `$ cd responsive-scatter-chart`
+  - `$ cd responsive-heatmap`
   - `$ npm install`
   - `$ npm run build`
   - `$ npm run start`

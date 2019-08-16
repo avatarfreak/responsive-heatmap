@@ -85,11 +85,7 @@ export class Heatmap {
       .data([null])
       .join("g")
       .attr("id", "x-axis")
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.innerHeight +
-          this.sizes.margin.top})`
-      )
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.innerHeight + this.sizes.margin.top})`)
       .call(xAxis)
       //rotate text at axis to 45 deg
       .selectAll("text")
@@ -111,13 +107,9 @@ export class Heatmap {
       .data([null])
       .join("g")
       .attr("id", "y-axis")
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
-      )
-      .call(yAxis);
-    return this;
-  }
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`) .call(yAxis);
+      return this;
+    }
 
   colorScale() {
     const colorScale = d3.scaleQuantize(d3.schemeSet2);
@@ -141,10 +133,7 @@ export class Heatmap {
       .attr("width", this.xScale.bandwidth)
       .attr("height", 0)
       .attr("fill", d => colorScale(d.variance))
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
-      )
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`)
       .on("mouseover", this.mouseover())
       .on("mouseout", this.mouseout());
 
@@ -234,10 +223,7 @@ export class Heatmap {
       .data([null])
       .join("g")
       .attr("id", "legend")
-      .attr(
-        "transform",
-        `translate(${margin.left}, ${this.innerHeight + margin.top + 50})`
-      )
+      .attr( "transform", `translate(${margin.left}, ${this.innerHeight + margin.top + 50})`)
       .call(legendAxis);
 
     //appending rect to legend
@@ -246,10 +232,7 @@ export class Heatmap {
       .data(data.monthlyVariance)
       .join("rect")
       .attr("class", "legend-rect")
-      .attr(
-        "width",
-        (data.monthlyVariance.length * 2) / data.monthlyVariance.length
-      )
+      .attr( "width", (data.monthlyVariance.length * 2) / data.monthlyVariance.length)
       .attr("height", 30)
       .attr("x", (d, i) => legendScale(data.baseTemperature + d.variance))
       .attr("y", (d, i) => margin.top)
@@ -259,7 +242,7 @@ export class Heatmap {
 }
 
 //fetch json data
-d3.json("src/assets/global-temp.json").then(res => {
+d3.json("../assets/global-temp.json").then(res => {
   let heatmap = new Heatmap(res);
   //resize window
   window.addEventListener("resize", () => {
