@@ -6,6 +6,8 @@ export class Heatmap {
     this.data = data;
     this.tooltip = d3.select(".display__svg").append("div");
     this.graph = d3.select(".display__svg");
+    this.innerHeight;
+    this.innerWidth;
     this.render();
   }
 
@@ -15,19 +17,26 @@ export class Heatmap {
     this.sizes = {
       height: display.clientHeight,
       width: display.clientWidth,
-      margin: { top: 20, right: 160, bottom: 180, left: 160 }
+      margin: { top: 20, right: 80, bottom: 180, left: 80 }
     };
 
-    this.drawCanvas(this.svg, this.sizes)
+    this.drawCanvas(this.sizes)
       .createScale()
       .addAxis()
       .addRect()
       .addTooltip()
-      .addLegend();
+      .addLegend()
+      .animate()
   }
-
-  drawCanvas(selection, props) {
-    const { height, width, margin } = props;
+  /**
+   *
+   *
+   * @param {Object} props
+   * @returns
+   * @memberof Heatmap
+   */
+  drawCanvas(props) {
+    const { height, width } = props;
 
     this.svg = this.graph
       .selectAll("svg")
@@ -40,20 +49,26 @@ export class Heatmap {
 
   createScale() {
     const { width, height, margin } = this.sizes;
+    //calculate inner height
     this.innerHeight = height - margin.top - margin.bottom;
-    this.innerWidth = width - margin.left - margin.right;
-    const data = this.data.monthlyVariance;
-    this.years = [...new Set(data.map(d => d.year))];
 
+    //calculate inner width
+    this.innerWidth = width - margin.left - margin.right;
+
+    //filtering out all duplicates year
+    this.years = [...new Set(this.data.monthlyVariance.map(d => d.year))];
+
+    //create x-scale
     this.xScale = d3
       .scaleBand()
       .domain(this.years)
       .range([0, this.innerWidth])
       .padding(0.1);
 
+    //create y-scale
     this.yScale = d3
       .scaleBand()
-      .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+      .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) //months
       .range([this.innerHeight, 0]);
     return this;
   }
@@ -61,35 +76,38 @@ export class Heatmap {
   addAxis() {
     const xAxis = d3
       .axisBottom(this.xScale)
+      //showing only years divisible by 20 as ticks
       .tickValues(this.years.filter(year => year % 20 === 0));
 
+    //plot x-axis on graph
     let xAxisGroup = this.svg
       .selectAll("#x-axis")
       .data([null])
       .join("g")
       .attr("id", "x-axis")
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.innerHeight +
-          this.sizes.margin.top})`
-      )
-      .call(xAxis);
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.innerHeight + this.sizes.margin.top})`)
+      .call(xAxis)
+      //rotate text at axis to 45 deg
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .style("dx", ".8em")
+      .style("dy", ".15em")
+      .attr("transform", "rotate(-45)");
 
     const yAxis = d3.axisLeft(this.yScale).tickFormat(d => {
+      //parsing month number to string eg. 0 --> January
       const timeParse = d3.timeFormat("%B");
       const month = timeParse(new Date(1999 + "-" + d));
       return month;
     });
 
+    //plot y-axis on graph
     this.yAxisGroup = this.svg
       .selectAll("#y-axis")
       .data([null])
       .join("g")
       .attr("id", "y-axis")
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
-      )
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`)
       .call(yAxis);
     return this;
   }
@@ -116,19 +134,40 @@ export class Heatmap {
       .attr("width", this.xScale.bandwidth)
       .attr("height", this.yScale.bandwidth)
       .attr("fill", d => colorScale(d.variance))
-      .attr(
-        "transform",
-        `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
-      )
-      .on("mouseover", function(d) {
-        const date = new Date(d.year, d.month);
-        tooltip
-          .transition()
-          .duration(200)
-          .style("opacity", 1);
-        tooltip
-          .html(
-            `
+      .attr( "transform", `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`)
+      .on("mouseover", this.mouseover())
+      .on("mouseout", this.mouseout());
+
+    return this;
+  }
+animate(){
+  this.rect.transition().duration(200)
+  return this;
+}
+  mouseout() {
+    let tooltip = this.tooltip;
+    return function() {
+      tooltip
+        .transition()
+        .duration(200)
+        .style("opacity", "0");
+      d3.select(this).style("opacity", 1);
+    };
+  }
+
+  mouseover() {
+    let tooltip = this.tooltip;
+    //dataset
+    let data = this.data;
+    return function(d) {
+      const date = new Date(d.year, d.month);
+      tooltip
+        .transition()
+        .duration(200)
+        .style("opacity", 1);
+      tooltip
+        .html(
+          `
           <label>Year: <b>${d.year}</b> </label> 
           <br>
           <label>Month:<b>${d3.timeFormat("%B")(date)}</b></label> 
@@ -139,22 +178,15 @@ export class Heatmap {
           <br>
           <label>var: <b>${d.variance.toFixed(1)}<sup>o</sup>c</b> </label> 
           `
-          )
-          .attr("data-year", d.year)
-          .style("left", `${d3.event.pageX + 10}px`)
-          .style("top", `${d3.event.pageY - 30}px`);
-        d3.select(this).style("opacity", 0.3);
-      })
-      .on("mouseout", function() {
-        tooltip
-          .transition()
-          .duration(200)
-          .style("opacity", "0");
-        d3.select(this).style("opacity", 1);
-      });
-
-    return this;
+        )
+        .attr("data-year", d.year)
+        .style("left", `${d3.event.pageX + 10}px`)
+        .style("top", `${d3.event.pageY - 30}px`);
+      d3.select(this).style("opacity", 0.3);
+    };
   }
+
+  //tooltip to show information
   addTooltip() {
     this.tooltip = this.tooltip
       .attr("id", "tooltip")
@@ -165,45 +197,38 @@ export class Heatmap {
       .style("opacity", 0);
     return this;
   }
+
   addLegend() {
     const { margin } = this.sizes;
     const colorScale = this.colorScale();
-    const d = d3.extent(this.data.monthlyVariance, d => d.variance);
+    const data = this.data;
 
-    const legendData = d3.range(d[0], d[1]);
+    const legendScale = d3
+      .scaleLinear()
+      .domain( d3.extent(data.monthlyVariance, d => data.baseTemperature + d.variance))
+      .range([0, this.innerWidth]);
 
+    //grouping lengend elements
+    const legendAxis = d3.axisBottom(legendScale).ticks(24);
     this.legend = this.svg
       .selectAll("#legend")
       .data([null])
       .join("g")
       .attr("id", "legend")
-      .attr(
-        "transform",
-        `translate(${-this.innerWidth / 2}, ${margin.top + 25})`
-      );
+      .attr( "transform", `translate(${margin.left}, ${this.innerHeight + margin.top + 50})`)
+      .call(legendAxis);
 
+    //appending rect to legend
     this.legend
       .selectAll(".legend-rect")
-      .data(legendData)
+      .data(data.monthlyVariance)
       .join("rect")
       .attr("class", "legend-rect")
-      .attr("width", 45)
+      .attr( "width", (data.monthlyVariance.length * 2) / data.monthlyVariance.length)
       .attr("height", 30)
-      .attr("x", (d, i) => this.innerWidth + i * 35)
-      .attr("y", (d, i) => this.innerHeight)
-      .style("fill", d => colorScale(d));
-
-    this.legend
-      .selectAll("text")
-      .data(legendData)
-      .join("text")
-      .attr("class", "legend-text")
-      .attr("fill", "white")
-      .style("font-size", ".8em")
-      .attr("x", (d, i) => this.innerWidth + i * 35)
-      .attr("y", (d, i) => this.innerHeight + margin.top + 25)
-      .text(d => (this.data.baseTemperature + d).toFixed(1));
-
+      .attr("x", (d, i) => legendScale(data.baseTemperature + d.variance))
+      .attr("y", (d, i) => margin.top)
+      .style("fill", (d, i) => colorScale(d.variance));
     return this;
   }
 }
