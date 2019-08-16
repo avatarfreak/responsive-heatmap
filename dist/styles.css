@@ -31,16 +31,20 @@ body {
       .container .display__svg .dot {
         stroke: rgba(29, 18, 15, 0.87); }
   .container address {
-    position: absolute;
-    bottom: 10px;
+    position: fixed;
+    bottom: 0;
     left: 0;
     right: 0;
     color: var(--title_text);
-    font-size: 11px; }
+    font-size: 0.65em;
+    background: #333; }
     .container address #profile-link {
       color: #a5e215;
       text-decoration: none;
       font-weight: bold; }
+    @media only screen and (max-width: 414px) {
+      .container address {
+        display: none; } }
   .container #tooltip {
     text-align: left;
     background: rgba(47, 79, 79, 0.938);
@@ -57,9 +61,6 @@ body {
     shape-rendering: crispEdges; }
   .container .y-axis-label {
     font-size: 1.5em; }
-    @media only screen and (min-width: 768px) {
-      .container .y-axis-label {
-        font-size: 2em; } }
 
 #loading {
   position: fixed;

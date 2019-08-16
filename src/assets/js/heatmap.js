@@ -10,13 +10,12 @@ export class Heatmap {
   }
 
   render() {
-    //this.svg = d3.select(".display__svg");
     //calculate new dimension, when resize is triggered.
     const display = document.querySelector(".display");
     this.sizes = {
       height: display.clientHeight,
       width: display.clientWidth,
-      margin: { top: 20, right: 60, bottom: 130, left: 90 }
+      margin: { top: 20, right: 160, bottom: 180, left: 160 }
     };
 
     this.drawCanvas(this.svg, this.sizes)
@@ -62,9 +61,7 @@ export class Heatmap {
   addAxis() {
     const xAxis = d3
       .axisBottom(this.xScale)
-      .tickValues(this.years.filter(year => year % 20 === 0))
-      //.tickFormat(d3.formatPrefix(".0s", 1e2))
-      .ticks(this.innerWidth / 70);
+      .tickValues(this.years.filter(year => year % 20 === 0));
 
     let xAxisGroup = this.svg
       .selectAll("#x-axis")
@@ -96,36 +93,18 @@ export class Heatmap {
       .call(yAxis);
     return this;
   }
-  addRect() {
-    var colorList = [
-      "#5E4FA2",
-      "#3288BD",
-      "#3288BD",
-      "#ABDDA4",
-      "#E6F598",
-      "#FFFFBF",
-      "#FEE08B",
-      "#FDAE61",
-      "#F46D43",
-      "#D53E4F",
-      "#9E0142"
-    ];
-    /*
-    const colorScale = d3
-      .scaleQuantile()
-      .domain(d3.extent(this.data.monthlyVariance, d => d.variance))
-      .range(colorList);
-      */
 
-    /* const colorScale = d3
-      .scaleSequential(d3.interpolatePlasma)
-      .domain(d3.extent(this.data.monthlyVariance, d => d.variance));
-    */
-    const tooltip = this.tooltip;
-
-    const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+  colorScale() {
+    const colorScale = d3.scaleQuantize(d3.schemeSet2);
     colorScale.domain(d3.extent(this.data.monthlyVariance, d => d.variance));
-    this.rect = this.svg.selectAll("rect").data(this.data.monthlyVariance);
+    return colorScale;
+  }
+
+  addRect() {
+    const colorScale = this.colorScale();
+    const tooltip = this.tooltip;
+    const data = this.data;
+    this.rect = this.svg.selectAll("rect").data(data.monthlyVariance);
     this.rect
       .join("rect")
       .attr("class", "cell")
@@ -142,7 +121,6 @@ export class Heatmap {
         `translate(${this.sizes.margin.left}, ${this.sizes.margin.top})`
       )
       .on("mouseover", function(d) {
-        console.log(this.data);
         const date = new Date(d.year, d.month);
         tooltip
           .transition()
@@ -155,12 +133,16 @@ export class Heatmap {
           <br>
           <label>Month:<b>${d3.timeFormat("%B")(date)}</b></label> 
           <br>
-          <label>Temp: <b>${d.variance.toFixed(2)}<sup>o</sup></b> </label> 
+          <label>Temp: <b>${(data.baseTemperature + d.variance).toFixed(
+            1
+          )}<sup>o</sup>c</b> </label> 
+          <br>
+          <label>var: <b>${d.variance.toFixed(1)}<sup>o</sup>c</b> </label> 
           `
           )
           .attr("data-year", d.year)
-          .style("left", `${d3.event.pageX}px`)
-          .style("top", `${d3.event.pageY}px`);
+          .style("left", `${d3.event.pageX + 10}px`)
+          .style("top", `${d3.event.pageY - 30}px`);
         d3.select(this).style("opacity", 0.3);
       })
       .on("mouseout", function() {
@@ -185,6 +167,11 @@ export class Heatmap {
   }
   addLegend() {
     const { margin } = this.sizes;
+    const colorScale = this.colorScale();
+    const d = d3.extent(this.data.monthlyVariance, d => d.variance);
+
+    const legendData = d3.range(d[0], d[1]);
+
     this.legend = this.svg
       .selectAll("#legend")
       .data([null])
@@ -192,16 +179,32 @@ export class Heatmap {
       .attr("id", "legend")
       .attr(
         "transform",
-        `translate(${margin.left},${this.innerHeight + margin.top}`
+        `translate(${-this.innerWidth / 2}, ${margin.top + 25})`
       );
 
-    return this;
-  }
+    this.legend
+      .selectAll(".legend-rect")
+      .data(legendData)
+      .join("rect")
+      .attr("class", "legend-rect")
+      .attr("width", 45)
+      .attr("height", 30)
+      .attr("x", (d, i) => this.innerWidth + i * 35)
+      .attr("y", (d, i) => this.innerHeight)
+      .style("fill", d => colorScale(d));
 
-  addEvents() {
-    this.rect.on("mouseover", function(d, i) {
-      alert("h");
-    });
+    this.legend
+      .selectAll("text")
+      .data(legendData)
+      .join("text")
+      .attr("class", "legend-text")
+      .attr("fill", "white")
+      .style("font-size", ".8em")
+      .attr("x", (d, i) => this.innerWidth + i * 35)
+      .attr("y", (d, i) => this.innerHeight + margin.top + 25)
+      .text(d => (this.data.baseTemperature + d).toFixed(1));
+
+    return this;
   }
 }
 
