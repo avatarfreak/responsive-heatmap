@@ -242,7 +242,7 @@ export class Heatmap {
 }
 
 //fetch json data
-d3.json("../assets/global-temp.json").then(res => {
+d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json").then(res => {
   let heatmap = new Heatmap(res);
   //resize window
   window.addEventListener("resize", () => {
